@@ -1,69 +1,55 @@
 /**
- * Created by naser on 3/15/14.
+ * Created by naser on 11/1/14.
  */
 public class QuickSort {
-    private static Integer[] b = { 5, 3, 4, 2, 1 };
+    private static long compareCounter = 0;
 
-    public static int partition(Comparable[] a, int lo, int hi) {
-        int i = lo, j = hi + 1;
-        while(true) {
-            while (Sort.less(a[++i], a[lo]))
-                if (i == hi) break;
+    private static int choosePivot(long[] a, int l, int r) {
+        return l;
+    }
 
-            while (Sort.less(a[lo], a[--j]))
-                if (j == lo) break;
+    private static int findMedian(long[] a, int l, int r) {
+        int m = (l+r)/2;
+        if (a[l] <= a[m] && a[l] >= a[r] || a[l] >= a[m] && a[l] <= a[r]) return l;
+        if (a[m] <= a[l] && a[m] >= a[r] || a[m] >= a[l] && a[m] <= a[r]) return m;
+        return r;
+    }
 
-            if (i >= j) break;
-            Sort.exch(a, i, j);
+    public static void sort(long[] a, int l, int r) {
+        if (r <= l) return;
+        compareCounter += r-l;
+        int median = findMedian(a, l, r);
+        int pivotPos = partition(a, l, r, median);
+        sort(a, l, pivotPos-1);
+        sort(a, pivotPos+1, r);
+    }
+
+    private static int partition(long[] a, int l, int r, int pivot) {
+        long p = a[pivot];
+        a[pivot] = a[l];
+        a[l] = p;
+
+        int i = l + 1;
+        for (int j = l+1; j <= r; j++) {
+            if (a[j] < p) {
+                long temp = a[j];
+                a[j] = a[i];
+                a[i] = temp;
+                i++;
+            }
         }
-
-        Sort.exch(a, lo, j);
-        return j;
+        long temp = a[l];
+        a[l] = a[i-1];
+        a[i-1] = temp;
+        return i-1;
     }
 
-    private static void sort(Comparable[] a, int lo, int hi) {
-        // cut of to insertion sort for small sizes (<= 10?)
-        if (hi <= lo + Sort.CUTOFF - 1)
-        {
-            Sort.insertionSort(a, lo, hi);
-            return;
-        }
-        if (hi <= lo) return;
-        int j = partition(a, lo, hi);
-        sort(a, lo, j - 1);
-        sort(a, j + 1, hi);
-    }
-
-    private static void sort3Way(Comparable[] a, int lo, int hi)
-    {
-        if (hi <= lo) return;
-        int lt = lo, gt = hi;
-        Comparable v = a[lo];
-        int i = lo;
-        while (i <= gt)
-        {
-            int cmp = a[i].compareTo(v);
-            if (cmp < 0) Sort.exch(a, lt++, i++);
-            else if (cmp > 0) Sort.exch(a, i, gt--);
-            else i++;
-        }
-        sort(a, lo, lt - 1);
-        sort(a, gt + 1, hi);
-    }
-
-
-    public static void sort(Comparable[] a) {
-        System.out.println("Before shuffling:");
-        Sort.print(a);
-        Sort.shuffle(a);
-        System.out.println("After shuffling:");
-        Sort.print(a);
-        sort(a, 0, a.length - 1);
-    }
     public static void main(String[] args) {
-        Sort.print(Sort.c);
-        sort(Sort.c);
-        System.out.println("After quick sorting: ");
-        Sort.print(Sort.c);
+        long[] a = FileService.textToArray("./src/QuickSort.txt");
+        sort(a, 0, a.length-1);
+        for (int i = 0; i < a.length; i++) {
+            System.out.println(a[i]);
+        }
+        System.out.println("# Compares: " + compareCounter);
     }
 }
